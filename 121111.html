@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GOAT — CR7 Card</title>
+
+    <!-- فیکس: Teko هم باید لود شود چون در CSS استفاده شده -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=BBH+Bogle&family=Teko:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ===== Reset ===== */
+      *,
+      *::before,
+      *::after {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      /* ===== متغیرهای سراسری ===== */
+      :root {
+        --gold: #e5a93b;
+        --gold-light: #f7d070;
+        --ink: #080c16;
+        --radius: 28px;
+      }
+
+      body {
+        min-height: 100vh;
+        background: radial-gradient(120% 90% at 50% 0%, #141c30 0%, #070a12 60%, #04060b 100%);
+        font-family: "BBH Bogle", sans-serif;
+        color: #fff;
+        overflow-x: hidden;
+      }
+
+      /* ===== واترمارک لوگوی رئال مادرید در پس‌زمینه ===== */
+      .bg-logo {
+        position: fixed;              /* با اسکرول جابه‌جا نمی‌شود */
+        inset: 0;
+        z-index: 0;                   /* پشت همه محتوا */
+        background: url("img/real-madrid-logo.png") center no-repeat;
+        background-size: min(52vmin, 480px);
+        opacity: 0.18;                /* واترمارک ملایم */
+        pointer-events: none;
+        user-select: none;
+      }
+
+      /* ===== بخش تیتر (Hero) ===== */
+      .box {
+        min-height: 100vh;   /* fallback */
+        min-height: 100svh;  /* موبایل: نوار آدرس را حساب می‌کند */
+        position: relative;
+        z-index: 1;          /* روی واترمارک */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+      }
+
+      .box h1 {
+        max-width: 90vw;
+        font-size: clamp(2rem, 6vw, 100px);
+        line-height: 1.15;
+        text-align: center;
+        text-wrap: balance;
+        will-change: transform; /* پارالاکس موس نرم‌تر اجرا شود */
+      }
+
+      /* ===== GOAT Card ===== */
+      .goat-card {
+        /* کل ترنسفورم از متغیرها ساخته می‌شود، پس JS فقط مقدار متغیرها را عوض می‌کند */
+        --rx: 0deg;  /* چرخش حول محور X (توسط JS ست می‌شود) */
+        --ry: 0deg;  /* چرخش حول محور Y (توسط JS ست می‌شود) */
+        --s: 1;      /* مقیاس: روی hover بزرگ می‌شود */
+        --ty: 0px;   /* جابه‌جایی عمودی: روی hover بالا می‌رود */
+
+        position: relative;
+        z-index: 1;          /* روی واترمارک */
+        display: block;
+        margin: 60px auto 140px;
+        width: min(440px, 90vw);
+        height: min(650px, 85vh);
+        border-radius: var(--radius);
+        overflow: hidden;
+        cursor: pointer;
+        background: var(--ink);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8),
+                    0 0 35px rgba(229, 169, 59, 0.25);
+
+        transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry))
+                   scale(var(--s)) translateY(var(--ty));
+
+        transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    box-shadow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      /* hover فقط متغیرها و سایه را تغییر می‌دهد — با tilt تداخل ندارد */
+      .goat-card:hover {
+        --s: 1.06;
+        --ty: -8px;
+        box-shadow: 0 35px 70px rgba(0, 0, 0, 0.9),
+                    0 0 50px rgba(229, 169, 59, 0.6);
+      }
+
+      /* هنگام حرکت موس ترنزیشن کوتاه (بدون لگ)، بعد از خروج نرم 0.6s */
+      .goat-card.is-tilting {
+        transition: transform 0.15s ease-out,
+                    box-shadow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      /* بوردر طلایی متالیک با ماسک (+ نسخه استاندارد mask برای فایرفاکس) */
+      .goat-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: var(--radius);
+        border: 2px solid transparent;
+        background: linear-gradient(135deg, var(--gold), transparent 50%, var(--gold-light)) border-box;
+        -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+                mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+                mask-composite: exclude;
+        pointer-events: none;
+        z-index: 3;
+      }
+
+      .goat-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        filter: grayscale(15%) contrast(1.15);
+        transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    filter 0.5s ease;
+      }
+
+      .goat-card:hover img {
+        transform: scale(1.1);
+        filter: grayscale(0%) contrast(1.1);
+      }
+
+      /* لایه تیره پایین عکس برای وضوح متن */
+      .overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(5, 8, 17, 0.95) 0%,
+          rgba(5, 8, 17, 0.65) 35%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+
+      /* کپشن پایین کارت */
+      figcaption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: clamp(20px, 7vw, 35px);
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        transform: translateY(10px);
+        transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .goat-card:hover figcaption {
+        transform: translateY(0);
+      }
+
+      .badge {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: var(--gold-light);
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      figcaption h2 {
+        font-family: "Teko", sans-serif;
+        font-weight: 700;
+        font-size: clamp(60px, 18vw, 85px);
+        line-height: 0.85;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
+        position: relative;
+      }
+
+      /* عدد ۷ بزرگ پشت متن */
+      .number-back {
+        position: absolute;
+        right: 25px;
+        bottom: -20px;
+        font-family: "Teko", sans-serif;
+        font-size: clamp(120px, 40vw, 190px);
+        font-weight: 700;
+        color: rgba(229, 169, 59, 0.12);
+        line-height: 1;
+        user-select: none;
+        pointer-events: none;
+        transition: color 0.4s ease, transform 0.4s ease;
+      }
+
+      .goat-card:hover .number-back {
+        color: rgba(229, 169, 59, 0.28);
+        transform: scale(1.08) translateY(-6px);
+      }
+
+      /* ===== مکان‌نمای سفارشی (نقطه + حلقه) ===== */
+      /* فیکس: position باید fixed باشد تا با اسکرول هم روی موس بماند
+         + pointer-events:none تا روی hover و tilt کارت اثر نگذارد */
+      .cs,
+      .cl {
+        position: fixed;
+        top: 0;
+        left: 0;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 100;          /* روی همه‌چیز */
+        will-change: transform;
+      }
+
+      /* نقطه کوچک وسط موس (فیکس: بوردر حذف شد، سایز مشخص شد) */
+      .cs {
+        width: 4px;
+        height: 4px;
+        margin: -2px 0 0 -2px; /* دقیقاً وسط موس قرار بگیرد */
+        background: #f6f4f4;
+      }
+
+      /* فیکس: حلقه دور موس سایز نداشت و اصلاً دیده نمی‌شد */
+      .cl {
+        width: 36px;
+        height: 36px;
+        margin: -18px 0 0 -18px;
+        border: 1px solid rgba(140, 140, 140, 0.6);
+        transition: width 0.25s ease, height 0.25s ease,
+                    margin 0.25s ease, border-color 0.25s ease;
+      }
+
+      /* وقتی موس روی کارت است، حلقه طلایی و بزرگ‌تر می‌شود */
+      .cl.is-hovering {
+        width: 54px;
+        height: 54px;
+        margin: -27px 0 0 -27px;
+        border-color: rgba(229, 169, 59, 0.85);
+      }
+
+      /* روی دستگاه لمسی مکان‌نمای سفارشی معنی ندارد */
+      @media (hover: none) {
+        .cs,
+        .cl {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- واترمارک لوگوی رئال مادرید (پشت همه‌چیز، ثابت وسط صفحه) -->
+    <div class="bg-logo" aria-hidden="true"></div>
+
+    <!-- مکان‌نمای سفارشی: نقطه + حلقه -->
+    <div class="cs" aria-hidden="true"></div>
+    <div class="cl" aria-hidden="true"></div>
+
+    <section class="box">
+      <h1>REAL MADRID IS KING OF THE SOCCER WORLD</h1>
+    </section>
+
+    <figure class="goat-card">
+      <!-- فیکس آدرس‌دهی: عکس خودت را با همین نام در پوشه img بگذار -->
+      <img src="img/e79f5a78fdadd96c720c1995a379d331.jpg" alt="Cristiano Ronaldo - Real Madrid" />
+      <div class="overlay"></div>
+      <figcaption>
+        <span class="badge">👑 All-Time Top Scorer</span>
+        <h2>GOAT</h2>
+        <div class="number-back" aria-hidden="true">7</div>
+      </figcaption>
+    </figure>
+
+    <script>
+      // پارالاکس ملایم تیتر با موس (بر اساس مرکز صفحه تا رفتار متقارن باشد)
+      const h = document.querySelector("h1");
+      window.addEventListener("mousemove", (e) => {
+        const x = e.clientX - innerWidth / 2;
+        const y = e.clientY - innerHeight / 2;
+        h.style.transform = `translate(${x / 40}px, ${y / 30}px)`;
+        h.style.textShadow = `${-x / 60}px ${y / 40}px 6px rgba(0,0,0,.6)`;
+      });
+
+      // ===== افکت 3D Tilt روی کارت =====
+      const fig = document.querySelector(".goat-card");
+      const MAX_TILT = 10; // حداکثر زاویه (درجه)
+
+      fig.addEventListener("mouseenter", () => fig.classList.add("is-tilting"));
+
+      fig.addEventListener("mousemove", (e) => {
+        const r = fig.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;  // -0.5 .. 0.5
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        fig.style.setProperty("--ry", `${-px * MAX_TILT * 2}deg`);
+        fig.style.setProperty("--rx", `${py * MAX_TILT * 2}deg`);
+      });
+
+      fig.addEventListener("mouseleave", () => {
+        fig.classList.remove("is-tilting");
+        fig.style.setProperty("--rx", "0deg");
+        fig.style.setProperty("--ry", "0deg");
+      });
+
+      // ===== مکان‌نمای سفارشی: نقطه فوری + حلقه با تاخیر نرم =====
+      const dot  = document.querySelector(".cs");
+      const ring = document.querySelector(".cl");
+
+      let mx = innerWidth / 2, my = innerHeight / 2; // موقعیت واقعی موس
+      let rx = mx, ry = my;                          // موقعیت نرم حلقه
+
+      // فیکس اصلی: پارامتر e فراموش شده بود و کد خطا می‌داد
+      window.addEventListener("mousemove", (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+        dot.style.transform = `translate(${mx}px, ${my}px)`;
+      });
+
+      // حلقه با یک لِرپ نرم دنبال موس می‌آید (افکت trailing)
+      (function follow() {
+        rx += (mx - rx) * 0.16;
+        ry += (my - ry) * 0.16;
+        ring.style.transform = `translate(${rx}px, ${ry}px)`;
+        requestAnimationFrame(follow);
+      })();
+
+      // جای اولیه وسط صفحه تا از گوشه شروع نشوند
+      dot.style.transform  = `translate(${mx}px, ${my}px)`;
+      ring.style.transform = `translate(${rx}px, ${ry}px)`;
+
+      // وقتی موس روی کارت است، حلقه طلایی می‌شود
+      fig.addEventListener("mouseenter", () => ring.classList.add("is-hovering"));
+      fig.addEventListener("mouseleave", () => ring.classList.remove("is-hovering"));
+    </script>
+  </body>
+</html>
